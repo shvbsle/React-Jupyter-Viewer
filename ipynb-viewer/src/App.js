@@ -12,7 +12,8 @@ class App extends React.Component {
     return (
       <div className="App">
         <JupViewer
-          file={ipynb}
+          // file={ipynb}
+          file="https://raw.githubusercontent.com/fastai/course-v3/master/nbs/dl1/00_notebook_tutorial.ipynb"
         />
       </div>
     )

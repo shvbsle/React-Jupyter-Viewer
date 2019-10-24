@@ -4,9 +4,11 @@
   "private": true,
   "dependencies": {
     "antd": "^3.24.2",
+    "markdown-it": "^10.0.0",
     "react": "^16.11.0",
     "react-ace": "^8.0.0",
     "react-dom": "^16.11.0",
+    "react-markdown": "^4.2.2",
     "react-scripts": "3.2.0"
   },
   "scripts": {
