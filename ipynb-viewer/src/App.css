@@ -20,3 +20,13 @@
 .App-link {
   color: #09d3ac;
 }
+
+.darkTheme > * {
+  background-color: #2F3129;
+  color: white;
+}
+
+.MDImg img {
+  max-width: 100%;
+}
+

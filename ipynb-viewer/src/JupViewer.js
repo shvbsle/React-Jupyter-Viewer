@@ -1,20 +1,28 @@
 import React from 'react';
 import {
     Card, Spin,
-    Tag, Col, Row, Typography
+    Tag, Col, Row, Typography,
+    Switch
 } from 'antd';
 import { render } from "react-dom";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-kuroir";
+import "ace-builds/src-noconflict/theme-terminal";
 import './App.css';
 
 const ReactMarkdown = require('react-markdown')
-
+const { Meta } = Card;
 
 class JupViewer extends React.Component {
     state = {
-
+        //file_path
+        fpath: "",
+        fbase_path: "",
+        // Editor Theme
+        ed_theme: 'darkTheme',
+        text_ed_theme: 'monokai',
         //themes:
         background_theme: "black",
         background_text_theme: 'white',
@@ -23,11 +31,30 @@ class JupViewer extends React.Component {
         background_output_theme: '#2F3129',
         loading: true,
         notebook_json: null,
-        placeholder_component: "Loading...."
+        placeholder_component: "Loading....",
+
+        // Gutter
+        gutterVisible: false
+    }
+
+    validURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+        return !!pattern.test(str);
     }
 
     async componentDidMount() {
         if (!!this.props.file) {
+            var fbase = this.props.file.split('/');
+            fbase.pop();
+            this.setState({
+                fpath: this.props.file,
+                fbase_path: fbase.join('/') + '/'
+            })
             await fetch(this.props.file)
                 .then((r) => r.text())
                 .then(async (text) => {
@@ -47,7 +74,6 @@ class JupViewer extends React.Component {
                             placeholder_component: 'Oops! We have problem opening the notebook'
                         })
                     }
-
                 })
         }
     }
@@ -56,6 +82,31 @@ class JupViewer extends React.Component {
         var cell_content = ``
         for (var code in source) {
             cell_content += source[code]
+        }
+        return cell_content
+    }
+
+    parseMD(source) {
+        var cell_content = ``
+        for (var code in source) {
+            var rgx = new RegExp(/src="(.*?)"/)
+            var new_source = source[code]
+            var old_source = source[code].match(rgx)
+            if (!!old_source && !this.validURL(old_source[1])) {
+                new_source = source[code].replace(/src="(.*?)"/, 'src="' + this.state.fbase_path + old_source[1] + '"')
+                // console.log(new_source)
+            } else {
+                var rgx2 = new RegExp(/\!\[(.*?)\]\((.*?)[\s|\)]/)
+                var s2 = source[code].match(rgx2)
+                if (!!s2 && !this.validURL(s2[2])) {
+                    // console.log(s2[2])
+                    // console.log(this.validURL(s2[2]))
+                    // console.log(new_source.replace(s2[2], this.state.fbase_path + s2[2]))
+                    new_source = new_source.replace(s2[2], this.state.fbase_path + s2[2])
+                }
+            }
+            // 
+            cell_content += new_source
         }
         return cell_content
     }
@@ -125,7 +176,7 @@ class JupViewer extends React.Component {
                         readOnly
                         placeholder="--"
                         mode="markdown"
-                        theme="monokai"
+                        theme={this.state.text_ed_theme}
                         name="stdout"
                         style={{
                             maxWidth: '700px',
@@ -133,7 +184,7 @@ class JupViewer extends React.Component {
                             margin: '10px 0px'
                         }}
                         width="100%"
-                        maxLines={lines_stdout+1}
+                        maxLines={lines_stdout + 1}
                         fontSize={14}
                         showPrintMargin={false}
                         showGutter={false}
@@ -153,7 +204,7 @@ class JupViewer extends React.Component {
                         readOnly
                         placeholder="--"
                         mode="markdown"
-                        theme="monokai"
+                        theme={this.state.text_ed_theme}
                         name="text"
                         style={{
                             maxWidth: '700px',
@@ -181,8 +232,8 @@ class JupViewer extends React.Component {
                         src={img_data}
                         style={{
                             display: img_found ? '' : 'none',
-                            width:'100%',
-                            backgroundColor:'white'
+                            width: '100%',
+                            backgroundColor: 'white'
                         }} />
                 </div>
                 <div style={{ padding: '5px 3px', display: error_found ? '' : 'none' }}>
@@ -192,7 +243,7 @@ class JupViewer extends React.Component {
                         readOnly
                         placeholder="--"
                         mode="markdown"
-                        theme="monokai"
+                        theme={this.state.text_ed_theme}
                         name="error"
                         style={{
                             maxWidth: '700px',
@@ -220,16 +271,130 @@ class JupViewer extends React.Component {
         return return_template
     }
 
+
+    themeChanger(ev) {
+        if (ev) {
+            this.setState({
+                // Editor Theme
+                ed_theme: 'darkTheme',
+                text_ed_theme: 'monokai',
+                //themes:
+                background_theme: "black",
+                background_text_theme: 'white',
+                // background_input_theme: '#2F3129',
+                background_input_theme: '#272822',
+                background_output_theme: '#2F3129',
+            })
+        }
+        else {
+            this.setState({
+                // Editor Theme
+                ed_theme: 'lightTheme',
+                text_ed_theme: 'kuroir',
+                //themes:
+                background_theme: "white",
+                background_text_theme: 'black',
+                // background_input_theme: '#2F3129',
+                background_input_theme: '#E8E9E8',
+                background_output_theme: '#F1F1F2',
+            })
+        }
+        console.log(`switch to ${ev}`);
+    }
+
+    gutterChanger(ev) {
+        if (ev) {
+            this.setState({
+                gutterVisible: true
+            })
+        }
+        else {
+            this.setState({
+                gutterVisible: false
+            })
+        }
+    }
+
     render() {
         console.log(this.props.file)
         return (
             <div>
-                {
-                    this.state.placeholder_component
-                }
                 <br></br>
                 <Spin spinning={this.state.loading} >
                     <center>
+                        {/* This is where the blog metadata and the cover will go */}
+                        <div class={this.state.ed_theme}>
+                            <Card
+                                bodyStyle={{
+                                    padding: '30px 10px',
+                                    backgroundColor: this.state.background_output_theme,
+                                }}
+                                style={{
+                                    width: '100%',
+                                    maxWidth: '800px',
+                                    border: 'none'
+                                }}
+                            >
+                                <Row>
+                                    <Col span={1}></Col>
+                                    <Col span={22}>
+                                        <Typography.Title strong style={{
+                                            color: this.state.background_text_theme,
+                                            // fontSize: '50px',
+                                            wordWrap: 'break-word',
+                                            width: '100%',
+                                        }}>{this.props.title}</Typography.Title>
+                                        <Typography.Title
+                                            level={4} style={{
+                                                color: this.state.background_text_theme,
+                                                wordWrap: 'break-word',
+                                                width: '100%',
+                                                display: !!this.props.subtitle ? '' : 'none'
+                                            }}>{this.props.subtitle}</Typography.Title>
+                                    </Col>
+                                    <Col span={1}></Col>
+                                </Row>
+
+                                <Row>
+                                    <Col span={1}></Col>
+                                    <Col span={22}>
+                                        <img
+                                            alt="No Cover Image Found"
+                                            style={{
+                                                display: !!this.props.coverImg ? '' : 'none',
+                                                width: '100%'
+                                            }}
+                                            src={!!this.props.coverImg ? this.props.coverImg : "http://eskipaper.com/images/simple-silver-wallpaper-1.jpg"} />
+                                    </Col>
+                                    <Col span={1}>
+
+                                    </Col>
+                                </Row>
+
+                                <br></br>
+                                <br></br>
+                                <Row>
+                                    <Col span={1}></Col>
+                                    <Col span={20}>
+                                        <Tag color="blue" style={{ float: 'left' }}>{this.state.loading ? "Unknown" : this.state.notebook_json['metadata']['kernelspec']['display_name']}</Tag>
+                                        <Switch
+                                            style={{
+                                                margin: '0px 5px'
+                                            }}
+                                            defaultChecked checkedChildren="dark theme" unCheckedChildren="light theme"
+                                            onChange={this.themeChanger.bind(this)}
+                                        />
+                                        <Switch
+                                            style={{
+                                                margin: '0px 5px'
+                                            }}
+                                            checkedChildren="gutter visilbe" unCheckedChildren="gutter hidden"
+                                            onChange={this.gutterChanger.bind(this)} />
+                                    </Col>
+                                    <Col span={1}></Col>
+                                </Row>
+                            </Card>
+                        </div>
                         {
                             this.state.loading ? <div></div> : (this.state.notebook_json['cells'].map(item => (
                                 <Card
@@ -238,30 +403,38 @@ class JupViewer extends React.Component {
                                         backgroundColor: this.state.background_output_theme
                                     }}
                                     style={{
-                                        width:'100%',
+                                        width: '100%',
                                         maxWidth: '800px',
                                         border: 'none'
                                     }}
                                 >
+
                                     <Row
                                         style={{
-                                            backgroundColor: item['cell_type'] == "code" ? this.state.background_output_theme : "white"
+                                            backgroundColor: this.state.background_output_theme
                                         }}
                                     >
-                                        <Col span={2}>
-                                            <Typography.Text
+                                        <Col span={this.state.gutterVisible ? 3 : 1}>
+                                            <div
                                                 style={{
-                                                    color: this.state.background_text_theme,
-                                                    float: 'left',
-                                                    padding: '5px',
-                                                    color: '#56ACBC',
-                                                    display: item['cell_type'] == "code" ? '' : 'none'
-                                                }}>
-                                                In [ 0 ]:
+                                                    display: this.state.gutterVisible ? '' : 'none'
+                                                }}
+                                            >
+                                                <Typography.Text
+                                                    style={{
+                                                        color: this.state.background_text_theme,
+                                                        float: 'left',
+                                                        padding: '5px',
+                                                        color: '#56ACBC',
+                                                        display: item['cell_type'] == "code" ? '' : 'none',
+                                                    }}>
+                                                    I [ {item['execution_count']} ]:
                                             </Typography.Text>
+
+                                            </div>
                                         </Col>
 
-                                        <Col span={21}
+                                        <Col span={this.state.gutterVisible ? 20 : 22}
                                             style={{
                                                 textAlign: 'left'
                                             }}
@@ -279,7 +452,7 @@ class JupViewer extends React.Component {
                                                         readOnly
                                                         placeholder="---"
                                                         mode="python"
-                                                        theme="monokai"
+                                                        theme={this.state.text_ed_theme}
                                                         name="code"
                                                         style={{
                                                             maxWidth: '700px',
@@ -302,17 +475,31 @@ class JupViewer extends React.Component {
                                                             tabSize: 2,
                                                         }} />
                                                 </div>
-                                            ) : <ReactMarkdown
-                                                    style={{
-                                                        float: 'left'
-                                                    }}
-                                                    source={this.praseSource(item['source'])}
-                                                    escapeHtml={false}
-                                                />}
+                                            ) :
 
+                                                <div class="MDImg">
+                                                    <div
+                                                        class={this.state.ed_theme}
+                                                        style={{
+                                                            margin: '0px 0px',
+                                                            padding: '10px',
+                                                            // border:'solid',
+                                                            // borderWidth:'1px'
+                                                        }}
+                                                    >
+                                                        <ReactMarkdown
+                                                            style={{
+                                                                float: 'left'
+                                                            }}
+                                                            source={this.parseMD(item['source'])}
+                                                            escapeHtml={false}
+                                                        />
+                                                    </div>
+                                                </div>}
                                         </Col>
                                         <Col span={1}></Col>
                                     </Row>
+
                                     {
                                         item['cell_type'] == 'markdown' ? <div></div> :
                                             (
@@ -322,18 +509,19 @@ class JupViewer extends React.Component {
                                                         backgroundColor: this.state.background_output_theme
                                                     }}>
 
-                                                    <Col span={2}>
+                                                    <Col span={this.state.gutterVisible ? 3 : 1}>
                                                         <Typography.Text
                                                             style={{
+                                                                display: this.state.gutterVisible ? '' : 'none',
                                                                 color: this.state.background_text_theme,
                                                                 float: 'left',
                                                                 padding: '5px',
                                                                 color: '#E5496A'
                                                             }}>
-                                                            Out [ ]:
+                                                            O [ {item['execution_count']} ]:
                                                         </Typography.Text>
                                                     </Col>
-                                                    <Col span={21}
+                                                    <Col span={this.state.gutterVisible ? 20 : 22}
                                                         style={{
                                                             textAlign: 'left',
                                                             color: 'white'
@@ -349,6 +537,7 @@ class JupViewer extends React.Component {
                         }
                     </center>
                 </Spin>
+                <br></br>
             </div>
         )
     }
