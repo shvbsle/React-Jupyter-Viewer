@@ -47,6 +47,8 @@ blog cover|good to have| An option to put in cover pic for your blog
 ---
 
 ### Usage
+Note that the notebook URL must be the raw_notebook url on github. Click on the 'raw' button in github notebook preview to get the raw source.
+
 ```javascript
 import React from 'react';
 import './App.css';
