@@ -3,6 +3,12 @@
 ## IMPORTANT!!!!
 I'm looking for contributors. I noticed that quite a lot of developers find this tool useful and at the same time I feel guilty that I cannot devote enough time to this project due to personal committments. Please reachout in case anyone wants to contribute!
 
+Join the following Slack Workspace for any queries:
+
+https://join.slack.com/t/reactjupytern-0nc7370/shared_invite/zt-gacg79oi-NYk9coLNBUXiqtQ80ohMKg
+
+
+
 ### Use jupyter notebooks as a blog
 The only reason why I am creating this component is to be able to publish my .ipynb notebooks on my GitHub pages as blog post. I have too many notebooks lying around with my programming notes.  I'm too lazy to boot a ipython kernel to view one of my notebooks. Hence, this component.
 
