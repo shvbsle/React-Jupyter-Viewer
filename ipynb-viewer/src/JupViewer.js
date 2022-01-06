@@ -120,12 +120,14 @@ class JupViewer extends React.Component {
         var stdout = ``
         var errors = ``
         var img_data = `data:image/png;base64,`
+        var html_data = ``
 
         //booleans
         var stdout_found = false
         var text_found = false
         var error_found = false
         var img_found = false
+        var html_found = false
 
         //maxlines for each output type
         var lines_stdout = 3
@@ -144,6 +146,12 @@ class JupViewer extends React.Component {
                 if ("image/png" in outputs[outs]["data"]) {
                     img_data += outputs[outs]["data"]["image/png"]
                     img_found = true
+                }
+                if ("text/html" in outputs[outs]["data"]) {
+                    outputs[outs]["data"]["text/html"].forEach((element)=>{
+                        html_data += element;
+                    });
+                    html_found=true
                 }
             }
             if ("name" in outputs[outs]) {
@@ -235,6 +243,9 @@ class JupViewer extends React.Component {
                             width: '100%',
                             backgroundColor: 'white'
                         }} />
+                </div>
+                <div style={{ display: html_found ? '' : 'none'}}>
+                    <div style={{ overflow: 'scroll'}} dangerouslySetInnerHTML={{ __html: html_data }} />
                 </div>
                 <div style={{ padding: '5px 3px', display: error_found ? '' : 'none' }}>
                     <Tag color="#f50"
