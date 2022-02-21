@@ -5,7 +5,7 @@ I'm looking for contributors. I noticed that quite a lot of developers find this
 
 Join the following Slack Workspace for any queries:
 
-https://join.slack.com/t/reactjupytern-0nc7370/shared_invite/zt-g3klwkrb-agZvRc5nNzNNXXkuXZopPw
+https://join.slack.com/t/reactjupytern-0nc7370/shared_invite/zt-140lhgtlg-HaVJNl5OTEdeK1ZomArVZA
 
 
 
