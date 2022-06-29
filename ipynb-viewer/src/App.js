@@ -14,8 +14,9 @@ class App extends React.Component {
           subtitle="I've always wanted to publish my jupyter notebooks as blogs. Finally I can."
           // coverImg="https://notionpress.com/blog/wp-content/uploads/2018/06/Cover-design.png"
           // file={ipynb}
-          file="https://raw.githubusercontent.com/jakevdp/PythonDataScienceHandbook/master/notebooks/00.00-Preface.ipynb"
+          // file="https://raw.githubusercontent.com/jakevdp/PythonDataScienceHandbook/master/notebooks/00.00-Preface.ipynb"
           // file="https://raw.githubusercontent.com/fastai/course-v3/master/nbs/dl1/00_notebook_tutorial.ipynb"
+          file="https://raw.githubusercontent.com/DazhiZhong/DazhiZhong.github.io/master/test.ipynb"
         />
       </div>
     )
